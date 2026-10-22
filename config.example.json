@@ -1,0 +1,35 @@
+{
+  "gateway": {
+    "host": "gateway.example.edu",
+    "port": 8443,
+    "ca_file": "",
+    "mtu": 1400
+  },
+  "protocol": {
+    "api_base": "/api/client",
+    "user_agent": "your_gateway_client_user_agent",
+    "session_cookie": "your_gateway_session_cookie",
+    "renew_salt": "your_gateway_session_renewal_salt"
+  },
+  "captcha": {
+    "model": "captcha-model.bin"
+  },
+  "auth": {
+    "username": "your_username",
+    "password": "your_password"
+  },
+  "inbounds": [
+    {
+      "type": "socks5",
+      "tag": "socks-in",
+      "listen": "127.0.0.1",
+      "port": 1080
+    },
+    {
+      "type": "http",
+      "tag": "http-in",
+      "listen": "127.0.0.1",
+      "port": 8080
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+# Secrets, local configurations, and runtime state
+config.json
+*.json
+!config.example.json
+*.session
+*.log
+*.png
+*.bin
+*.tmp
+
+# Only the READMEs and the licence are documentation; nothing else.
+*.md
+*.txt
+!README*.md
+!LICENSE
+
+# Go build artifacts
+/bin/
+*.exe
+*.dll
+*.so
+*.dylib
+/njupt-tunnel
+go.work

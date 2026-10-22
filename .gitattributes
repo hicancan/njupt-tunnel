@@ -1,0 +1,6 @@
+# Check every text file out with LF on every platform. Without this a Windows
+# checkout converts Go sources to CRLF and gofmt reports the whole tree.
+* text=auto eol=lf
+
+*.bin binary
+*.png binary

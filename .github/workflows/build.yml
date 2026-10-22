@@ -1,0 +1,160 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+    tags: [ "v*" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      # Formatting is part of the build: an unformatted file fails here rather
+      # than surviving into review.
+      - name: Check formatting
+        shell: bash
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then
+            echo "gofmt needed for:"; echo "$unformatted"; exit 1
+          fi
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test with the race detector
+        env:
+          CGO_ENABLED: 1
+        run: go test -race -count=1 ./...
+
+      # The benchmarks are the performance baseline; a change that breaks one
+      # should fail here instead of being noticed later.
+      - name: Compile and smoke the benchmarks
+        run: go test -run XXX -bench . -benchtime 1x ./...
+
+  build:
+    name: Build ${{ matrix.goos }}/${{ matrix.goarch }}
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { goos: windows, goarch: amd64, suffix: .exe }
+          - { goos: windows, goarch: arm64, suffix: .exe }
+          - { goos: linux,   goarch: amd64, suffix: "" }
+          - { goos: linux,   goarch: arm64, suffix: "" }
+          - { goos: darwin,  goarch: amd64, suffix: "" }
+          - { goos: darwin,  goarch: arm64, suffix: "" }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build
+        shell: bash
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 0
+        run: |
+          # A tagged build reports its tag; every other build stays honest
+          # about being a development build.
+          version=dev
+          if [ "$GITHUB_REF_TYPE" = tag ]; then version="$GITHUB_REF_NAME"; fi
+          name="njupt-tunnel-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}"
+          go build -trimpath \
+            -ldflags="-s -w -X main.Version=$version -X main.GitCommit=${{ github.sha }} -X main.BuildDate=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            -o "bin/$name" ./cmd/njupt-tunnel
+
+      # The one target this runner can execute proves the version really was
+      # linked in, so a release cannot ship binaries that misreport themselves.
+      - name: Check the reported version
+        if: matrix.goos == 'linux' && matrix.goarch == 'amd64'
+        run: |
+          reported="$(./bin/njupt-tunnel-linux-amd64 -v)"
+          echo "$reported"
+          expected=dev
+          if [ "$GITHUB_REF_TYPE" = tag ]; then expected="$GITHUB_REF_NAME"; fi
+          case "$reported" in
+            "njupt-tunnel $expected ("*) ;;
+            *) echo "expected version $expected"; exit 1 ;;
+          esac
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: njupt-tunnel-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: bin/*
+          if-no-files-found: error
+
+  release:
+    name: Release ${{ github.ref_name }}
+    needs: build
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Checksums
+        run: cd dist && sha256sum njupt-tunnel-* > SHA256SUMS && cat SHA256SUMS
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > notes.md <<'EOF'
+          A single static binary. Download the one for your platform, put a
+          `config.json` beside it, and run it. No driver, no elevation, no
+          change to host routing.
+
+          | Platform | Asset |
+          |---|---|
+          | Windows x64 | `njupt-tunnel-windows-amd64.exe` |
+          | Windows ARM64 | `njupt-tunnel-windows-arm64.exe` |
+          | Linux x64 | `njupt-tunnel-linux-amd64` |
+          | Linux ARM64 | `njupt-tunnel-linux-arm64` |
+          | macOS Intel | `njupt-tunnel-darwin-amd64` |
+          | macOS Apple silicon | `njupt-tunnel-darwin-arm64` |
+
+          Verify a download against `SHA256SUMS`:
+
+          ```sh
+          sha256sum -c SHA256SUMS --ignore-missing          # Linux, macOS
+          ```
+
+          ```powershell
+          Get-FileHash .\njupt-tunnel-windows-amd64.exe     # Windows
+          ```
+
+          EOF
+          # The body is written with an unexpanded heredoc so its backticks stay
+          # literal; the documentation links are appended expanded, pinned to
+          # this tag rather than to whatever main holds later.
+          base="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/blob/$GITHUB_REF_NAME"
+          printf 'Configuration fields, the captcha model format and the known nine-minute gateway behaviour are documented in the README ([English](%s/README.md) · [简体中文](%s/README.zh-CN.md)).\n' "$base" "$base" >> notes.md
+          gh release create "$GITHUB_REF_NAME" \
+            dist/njupt-tunnel-* dist/SHA256SUMS config.example.json \
+            --title "$GITHUB_REF_NAME" --notes-file notes.md
