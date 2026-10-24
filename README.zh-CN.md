@@ -1,4 +1,4 @@
-# njupt-tunnel
+# sdp-tunnel
 
 [English](README.md) · **简体中文**
 
@@ -48,7 +48,7 @@
 ## 下载
 
 每个版本都附带 Windows、Linux、macOS 的 x64 与 ARM64 静态二进制，并附
-`SHA256SUMS` 供校验：[最新发布](https://github.com/hicancan/njupt-tunnel/releases/latest)。
+`SHA256SUMS` 供校验：[最新发布](https://github.com/hicancan/sdp-tunnel/releases/latest)。
 无需安装——把 `config.json` 放在二进制旁边跑就行。
 
 ## 构建
@@ -56,7 +56,7 @@
 只需要 Go 1.27 或更高版本，没有其它依赖。
 
 ```sh
-go build -trimpath -ldflags='-s -w' -o bin/njupt-tunnel ./cmd/njupt-tunnel
+go build -trimpath -ldflags='-s -w' -o bin/sdp-tunnel ./cmd/sdp-tunnel
 go test ./...
 ```
 
@@ -114,9 +114,9 @@ go test ./...
 ## 运行
 
 ```sh
-./njupt-tunnel -c config.json          # 启动配置好的入站
-./njupt-tunnel -c config.json -check   # 仅校验缓存会话与握手
-./njupt-tunnel -v                      # 版本
+./sdp-tunnel -c config.json          # 启动配置好的入站
+./sdp-tunnel -c config.json -check   # 仅校验缓存会话与握手
+./sdp-tunnel -v                      # 版本
 ```
 
 然后把想走隧道的流量送到代理端口。若使用 sing-box、Xray 之类的分流客户端，把本地 SOCKS5 端口声明为一个出站，再匹配那些应当走网关的目标。有两条规则很关键：

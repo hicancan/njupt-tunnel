@@ -1,4 +1,4 @@
-# njupt-tunnel
+# sdp-tunnel
 
 **English** · [简体中文](README.zh-CN.md)
 
@@ -56,7 +56,7 @@ an oversight.
 
 Every release carries a static binary for Windows, Linux and macOS on x64 and
 ARM64, with `SHA256SUMS` to check it against:
-[the latest release](https://github.com/hicancan/njupt-tunnel/releases/latest).
+[the latest release](https://github.com/hicancan/sdp-tunnel/releases/latest).
 There is nothing to install — put a `config.json` beside the binary and run it.
 
 ## Build
@@ -64,7 +64,7 @@ There is nothing to install — put a `config.json` beside the binary and run it
 Needs Go 1.27 or newer and nothing else.
 
 ```sh
-go build -trimpath -ldflags='-s -w' -o bin/njupt-tunnel ./cmd/njupt-tunnel
+go build -trimpath -ldflags='-s -w' -o bin/sdp-tunnel ./cmd/sdp-tunnel
 go test ./...
 ```
 
@@ -134,9 +134,9 @@ in from scratch.
 ## Run
 
 ```sh
-./njupt-tunnel -c config.json          # serve the configured inbounds
-./njupt-tunnel -c config.json -check   # validate a cached session and the handshake only
-./njupt-tunnel -v                      # version
+./sdp-tunnel -c config.json          # serve the configured inbounds
+./sdp-tunnel -c config.json -check   # validate a cached session and the handshake only
+./sdp-tunnel -v                      # version
 ```
 
 Then send the traffic you want tunnelled to the proxy. With a routing client

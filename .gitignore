@@ -20,5 +20,5 @@ config.json
 *.dll
 *.so
 *.dylib
-/njupt-tunnel
+/sdp-tunnel
 go.work

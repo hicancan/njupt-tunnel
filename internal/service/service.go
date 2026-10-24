@@ -11,11 +11,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hicancan/njupt-tunnel/internal/captcha"
-	"github.com/hicancan/njupt-tunnel/internal/config"
-	"github.com/hicancan/njupt-tunnel/internal/gateway"
-	"github.com/hicancan/njupt-tunnel/internal/inbound"
-	"github.com/hicancan/njupt-tunnel/internal/tunnel"
+	"github.com/hicancan/sdp-tunnel/internal/captcha"
+	"github.com/hicancan/sdp-tunnel/internal/config"
+	"github.com/hicancan/sdp-tunnel/internal/gateway"
+	"github.com/hicancan/sdp-tunnel/internal/inbound"
+	"github.com/hicancan/sdp-tunnel/internal/tunnel"
 )
 
 func Run(ctx context.Context, path string, check bool) error {

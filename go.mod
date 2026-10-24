@@ -1,4 +1,4 @@
-module github.com/hicancan/njupt-tunnel
+module github.com/hicancan/sdp-tunnel
 
 go 1.27.3
 

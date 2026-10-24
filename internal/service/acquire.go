@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hicancan/njupt-tunnel/internal/captcha"
-	"github.com/hicancan/njupt-tunnel/internal/config"
-	"github.com/hicancan/njupt-tunnel/internal/gateway"
+	"github.com/hicancan/sdp-tunnel/internal/captcha"
+	"github.com/hicancan/sdp-tunnel/internal/config"
+	"github.com/hicancan/sdp-tunnel/internal/gateway"
 )
 
 type fatalError struct{ error }

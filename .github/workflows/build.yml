@@ -78,28 +78,28 @@ jobs:
           # about being a development build.
           version=dev
           if [ "$GITHUB_REF_TYPE" = tag ]; then version="$GITHUB_REF_NAME"; fi
-          name="njupt-tunnel-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}"
+          name="sdp-tunnel-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}"
           go build -trimpath \
             -ldflags="-s -w -X main.Version=$version -X main.GitCommit=${{ github.sha }} -X main.BuildDate=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-            -o "bin/$name" ./cmd/njupt-tunnel
+            -o "bin/$name" ./cmd/sdp-tunnel
 
       # The one target this runner can execute proves the version really was
       # linked in, so a release cannot ship binaries that misreport themselves.
       - name: Check the reported version
         if: matrix.goos == 'linux' && matrix.goarch == 'amd64'
         run: |
-          reported="$(./bin/njupt-tunnel-linux-amd64 -v)"
+          reported="$(./bin/sdp-tunnel-linux-amd64 -v)"
           echo "$reported"
           expected=dev
           if [ "$GITHUB_REF_TYPE" = tag ]; then expected="$GITHUB_REF_NAME"; fi
           case "$reported" in
-            "njupt-tunnel $expected ("*) ;;
+            "sdp-tunnel $expected ("*) ;;
             *) echo "expected version $expected"; exit 1 ;;
           esac
 
       - uses: actions/upload-artifact@v4
         with:
-          name: njupt-tunnel-${{ matrix.goos }}-${{ matrix.goarch }}
+          name: sdp-tunnel-${{ matrix.goos }}-${{ matrix.goarch }}
           path: bin/*
           if-no-files-found: error
 
@@ -119,7 +119,7 @@ jobs:
           merge-multiple: true
 
       - name: Checksums
-        run: cd dist && sha256sum njupt-tunnel-* > SHA256SUMS && cat SHA256SUMS
+        run: cd dist && sha256sum sdp-tunnel-* > SHA256SUMS && cat SHA256SUMS
 
       - name: Publish
         env:
@@ -132,12 +132,12 @@ jobs:
 
           | Platform | Asset |
           |---|---|
-          | Windows x64 | `njupt-tunnel-windows-amd64.exe` |
-          | Windows ARM64 | `njupt-tunnel-windows-arm64.exe` |
-          | Linux x64 | `njupt-tunnel-linux-amd64` |
-          | Linux ARM64 | `njupt-tunnel-linux-arm64` |
-          | macOS Intel | `njupt-tunnel-darwin-amd64` |
-          | macOS Apple silicon | `njupt-tunnel-darwin-arm64` |
+          | Windows x64 | `sdp-tunnel-windows-amd64.exe` |
+          | Windows ARM64 | `sdp-tunnel-windows-arm64.exe` |
+          | Linux x64 | `sdp-tunnel-linux-amd64` |
+          | Linux ARM64 | `sdp-tunnel-linux-arm64` |
+          | macOS Intel | `sdp-tunnel-darwin-amd64` |
+          | macOS Apple silicon | `sdp-tunnel-darwin-arm64` |
 
           Verify a download against `SHA256SUMS`:
 
@@ -146,7 +146,7 @@ jobs:
           ```
 
           ```powershell
-          Get-FileHash .\njupt-tunnel-windows-amd64.exe     # Windows
+          Get-FileHash .\sdp-tunnel-windows-amd64.exe     # Windows
           ```
 
           EOF
@@ -156,5 +156,5 @@ jobs:
           base="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/blob/$GITHUB_REF_NAME"
           printf 'Configuration fields, the captcha model format and the known nine-minute gateway behaviour are documented in the README ([English](%s/README.md) · [简体中文](%s/README.zh-CN.md)).\n' "$base" "$base" >> notes.md
           gh release create "$GITHUB_REF_NAME" \
-            dist/njupt-tunnel-* dist/SHA256SUMS config.example.json \
+            dist/sdp-tunnel-* dist/SHA256SUMS config.example.json \
             --title "$GITHUB_REF_NAME" --notes-file notes.md

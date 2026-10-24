@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hicancan/njupt-tunnel/internal/config"
-	"github.com/hicancan/njupt-tunnel/internal/gateway"
-	"github.com/hicancan/njupt-tunnel/internal/tunnel"
+	"github.com/hicancan/sdp-tunnel/internal/config"
+	"github.com/hicancan/sdp-tunnel/internal/gateway"
+	"github.com/hicancan/sdp-tunnel/internal/tunnel"
 )
 
 type validatorFunc func(context.Context, *gateway.Session) (*gateway.Session, error)

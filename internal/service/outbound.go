@@ -5,7 +5,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/hicancan/njupt-tunnel/internal/tunnel"
+	"github.com/hicancan/sdp-tunnel/internal/tunnel"
 )
 
 // outbound is the only mutable pointer to the live tunnel. Inbounds dial

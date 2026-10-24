@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"syscall"
 
-	"github.com/hicancan/njupt-tunnel/internal/service"
+	"github.com/hicancan/sdp-tunnel/internal/service"
 )
 
 // Set by the release build. A binary built by hand reports these defaults
@@ -27,13 +27,13 @@ func main() {
 	check := flag.Bool("check", false, "check cached authentication and the tunnel handshake without opening listeners or logging in")
 	flag.Parse()
 	if *version {
-		fmt.Printf("njupt-tunnel %s (%s, %s)\n", Version, GitCommit, BuildDate)
+		fmt.Printf("sdp-tunnel %s (%s, %s)\n", Version, GitCommit, BuildDate)
 		return
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	if err := service.Run(ctx, configPath(*path), *check); err != nil {
-		log.Printf("njupt-tunnel: %v", err)
+		log.Printf("sdp-tunnel: %v", err)
 		os.Exit(1)
 	}
 }
